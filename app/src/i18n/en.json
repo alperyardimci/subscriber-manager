@@ -6,7 +6,7 @@
   "subscriptions": {
     "title": "Subscriptions",
     "empty": "No subscriptions yet",
-    "emptyAction": "Add your first subscription",
+    "emptyAction": "Add Your First Subscription",
     "addNew": "New Subscription",
     "edit": "Edit Subscription",
     "detail": "Subscription Detail",
@@ -24,18 +24,38 @@
     "yearly": "Yearly",
     "custom": "Custom",
     "customDays": "Number of Days",
+    "daysUnit": "days",
     "nextPayment": "Next Payment",
-    "notifyBefore": "Notify Before (days)",
+    "notifyBefore": "Notify Before",
+    "notifyBeforeDays": "Notify Before (days)",
     "category": "Category",
+    "categoryPlaceholder": "Enter category name...",
+    "categoryOther": "Other",
+    "categoryVideo": "Video",
+    "categoryMusic": "Music",
+    "categoryCloud": "Cloud",
+    "categoryAI": "AI",
+    "categorySports": "Sports",
     "notes": "Notes",
     "totalMonthly": "Monthly Total",
     "totalYearly": "Yearly Total",
+    "upcomingPayments": "Next 30 Days",
+    "noUpcoming": "No upcoming payments",
+    "filterAll": "All",
+    "reminderEnabled": "Payment Reminder",
+    "reminderOff": "Off",
+    "subscriptionCount": "{{count}} subscriptions",
     "credentials": "Credentials",
-    "addCredential": "Add Credential",
+    "addCredential": "+ Add Credential",
     "namePlaceholder": "e.g. Netflix, Spotify",
     "urlPlaceholder": "e.g. https://netflix.com",
     "amountPlaceholder": "0.00",
-    "notesPlaceholder": "Optional notes..."
+    "notesPlaceholder": "Optional notes...",
+    "datePlaceholder": "e.g. 2025-03-15",
+    "validationNameRequired": "Please enter a subscription name.",
+    "validationAmountRequired": "Please enter a valid amount.",
+    "validationCustomDaysRequired": "Please enter a valid number of days.",
+    "noCredentials": "No credentials added yet"
   },
   "credentials": {
     "title": "Credentials",
@@ -44,6 +64,7 @@
     "serviceUrl": "Service URL",
     "username": "Username / Email",
     "password": "Password",
+    "passwordChangePlaceholder": "(enter to change)",
     "reveal": "Reveal",
     "hide": "Hide",
     "copy": "Copy",
@@ -52,7 +73,9 @@
     "cancel": "Cancel",
     "biometricPrompt": "Authentication required to view password",
     "urlPlaceholder": "e.g. https://netflix.com",
-    "usernamePlaceholder": "e.g. user@email.com"
+    "usernamePlaceholder": "e.g. user@email.com",
+    "validationUsernameRequired": "Please enter a username.",
+    "validationPasswordRequired": "Please enter a password."
   },
   "settings": {
     "title": "Settings",
@@ -62,7 +85,7 @@
     "notificationPermission": "Notification Permission",
     "permissionGranted": "Granted",
     "permissionDenied": "Denied",
-    "openSettings": "Open Settings",
+    "openSettings": "System Settings",
     "language": "Language",
     "turkish": "Turkish",
     "english": "English",
@@ -70,17 +93,18 @@
     "autofillEnabled": "Enabled",
     "autofillDisabled": "Disabled",
     "autofillSetup": "Setup",
+    "autofillLabel": "AutoFill",
     "about": "About",
     "version": "Version"
   },
   "templates": {
-    "title": "Popular Services",
+    "title": "Add Subscription",
     "manualAdd": "Add Manually",
     "selectTemplate": "Choose Template",
     "categories": {
       "video": "Video",
       "music": "Music",
-      "cloud": "Cloud",
+      "cloud": "Cloud Storage",
       "ai": "AI",
       "sports": "Sports"
     },
@@ -112,6 +136,7 @@
     "back": "Back",
     "loading": "Loading...",
     "error": "Error",
-    "success": "Success"
+    "success": "Success",
+    "add": "Add"
   }
 }

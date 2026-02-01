@@ -9,8 +9,9 @@ import {
 import {useTranslation} from 'react-i18next';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import Ionicons from '@react-native-vector-icons/ionicons';
 import type {RootStackParamList, SubscriptionTemplate} from '../../../lib/types';
-import {colors, spacing, fontSize, borderRadius} from '../../../lib/theme';
+import {colors, spacing, fontSize, borderRadius, categoryColor} from '../../../lib/theme';
 import {SUBSCRIPTION_TEMPLATES} from '../data/templates';
 
 type NavProp = NativeStackNavigationProp<RootStackParamList>;
@@ -33,6 +34,7 @@ export function TemplatePickerScreen() {
       .filter(cat => grouped[cat])
       .map(cat => ({
         title: t(`templates.categories.${cat}`),
+        category: cat,
         data: grouped[cat],
       }));
   }, [t]);
@@ -55,7 +57,10 @@ export function TemplatePickerScreen() {
         {row.map(item => (
           <View key={item.id} style={styles.gridItem}>
             <TouchableOpacity
-              style={styles.templateCard}
+              style={[
+                styles.templateCard,
+                {borderTopColor: categoryColor(item.category)},
+              ]}
               onPress={() => handleTemplatePress(item)}
               activeOpacity={0.7}
               accessibilityRole="button"
@@ -85,7 +90,7 @@ export function TemplatePickerScreen() {
         activeOpacity={0.7}
         accessibilityRole="button"
         accessibilityLabel={t('templates.manualAdd')}>
-        <Text style={styles.manualAddIcon}>{'✏️'}</Text>
+        <Ionicons name="create-outline" size={20} color={colors.primary} style={{marginRight: spacing.sm}} />
         <Text style={styles.manualAddText}>{t('templates.manualAdd')}</Text>
       </TouchableOpacity>
 
@@ -111,17 +116,13 @@ const styles = StyleSheet.create({
   manualAddButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.surface,
+    backgroundColor: 'transparent',
     marginBottom: spacing.sm,
     padding: spacing.md,
     borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.borderLight,
     borderStyle: 'dashed',
-  },
-  manualAddIcon: {
-    fontSize: 20,
-    marginRight: spacing.sm,
   },
   manualAddText: {
     fontSize: fontSize.md,
@@ -150,6 +151,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
     borderWidth: 1,
     borderColor: colors.border,
+    borderTopWidth: 2,
     padding: spacing.sm,
     alignItems: 'center',
     justifyContent: 'center',

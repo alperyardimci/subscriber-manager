@@ -63,11 +63,11 @@ export function CredentialFormScreen() {
 
   async function handleSave() {
     if (!username.trim()) {
-      Alert.alert(t('common.error'), t('credentials.username'));
+      Alert.alert(t('common.error'), t('credentials.validationUsernameRequired'));
       return;
     }
     if (!password && !isEditing) {
-      Alert.alert(t('common.error'), t('credentials.password'));
+      Alert.alert(t('common.error'), t('credentials.validationPasswordRequired'));
       return;
     }
 
@@ -109,7 +109,7 @@ export function CredentialFormScreen() {
   return (
     <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
       <View style={styles.form}>
-        <Text style={styles.label}>{t('credentials.serviceUrl')}</Text>
+        <Text style={styles.label}>{t('credentials.serviceUrl').toUpperCase()}</Text>
         <TextInput
           style={styles.input}
           value={serviceUrl}
@@ -120,7 +120,7 @@ export function CredentialFormScreen() {
           keyboardType="url"
         />
 
-        <Text style={styles.label}>{t('credentials.username')}</Text>
+        <Text style={styles.label}>{t('credentials.username').toUpperCase()}</Text>
         <TextInput
           style={styles.input}
           value={username}
@@ -131,14 +131,14 @@ export function CredentialFormScreen() {
           autoComplete="username"
         />
 
-        <Text style={styles.label}>{t('credentials.password')}</Text>
+        <Text style={styles.label}>{t('credentials.password').toUpperCase()}</Text>
         <View style={styles.passwordRow}>
           <TextInput
             style={[styles.input, styles.passwordInput]}
             value={password}
             onChangeText={setPassword}
             secureTextEntry={!showPassword}
-            placeholder={isEditing ? '(degistirmek icin girin)' : ''}
+            placeholder={isEditing ? t('credentials.passwordChangePlaceholder') : ''}
             placeholderTextColor={colors.textLight}
             autoComplete="password"
           />
@@ -168,14 +168,15 @@ const styles = StyleSheet.create({
     padding: spacing.md,
   },
   label: {
-    fontSize: fontSize.sm,
+    fontSize: fontSize.xs,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.textSecondary,
     marginBottom: spacing.xs,
     marginTop: spacing.md,
+    letterSpacing: 0.5,
   },
   input: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceLight,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: borderRadius.md,
@@ -207,7 +208,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.lg,
   },
   saveButtonText: {
-    color: '#FFFFFF',
+    color: colors.background,
     fontSize: fontSize.md,
     fontWeight: '700',
   },

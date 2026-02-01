@@ -11,6 +11,7 @@ import {useTranslation} from 'react-i18next';
 import {useNavigation, useRoute, useFocusEffect} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import type {RouteProp} from '@react-navigation/native';
+import i18n from '../../../i18n';
 import {
   getSubscriptionById,
   deleteSubscription,
@@ -41,9 +42,12 @@ export function SubscriptionDetailScreen() {
   const loadData = useCallback(async () => {
     const sub = await getSubscriptionById(subscriptionId);
     setSubscription(sub);
+    if (sub) {
+      navigation.setOptions({title: sub.name});
+    }
     const creds = await getCredentialsBySubscription(subscriptionId);
     setCredentials(creds);
-  }, [subscriptionId]);
+  }, [subscriptionId, navigation]);
 
   useFocusEffect(
     useCallback(() => {
@@ -79,12 +83,14 @@ export function SubscriptionDetailScreen() {
     );
   }
 
+  const locale = i18n.language === 'tr' ? 'tr-TR' : 'en-US';
+
   const cycleLabel =
     subscription.billing_cycle === 'monthly'
       ? t('subscriptions.monthly')
       : subscription.billing_cycle === 'yearly'
         ? t('subscriptions.yearly')
-        : `${subscription.custom_cycle_days} ${t('subscriptions.customDays')}`;
+        : `${subscription.custom_cycle_days} ${t('subscriptions.daysUnit')}`;
 
   return (
     <ScrollView style={styles.container}>
@@ -101,11 +107,15 @@ export function SubscriptionDetailScreen() {
       <View style={styles.section}>
         <DetailRow
           label={t('subscriptions.nextPayment')}
-          value={new Date(subscription.next_payment_date).toLocaleDateString('tr-TR')}
+          value={new Date(subscription.next_payment_date).toLocaleDateString(locale)}
         />
         <DetailRow
-          label={t('subscriptions.notifyBefore')}
-          value={`${subscription.notification_advance_days} ${t('subscriptions.customDays')}`}
+          label={t('subscriptions.reminderEnabled')}
+          value={
+            subscription.notification_advance_days > 0
+              ? `${subscription.notification_advance_days} ${t('subscriptions.daysUnit')}`
+              : t('subscriptions.reminderOff')
+          }
         />
         {subscription.service_url && (
           <DetailRow
@@ -138,7 +148,7 @@ export function SubscriptionDetailScreen() {
           <CredentialCard key={cred.id} credential={cred} />
         ))}
         {credentials.length === 0 && (
-          <Text style={styles.emptyCredentials}>—</Text>
+          <Text style={styles.emptyCredentials}>{t('subscriptions.noCredentials')}</Text>
         )}
       </View>
 
@@ -197,7 +207,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   cycleBadge: {
-    backgroundColor: colors.primary + '15',
+    backgroundColor: colors.primaryMuted,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
     borderRadius: borderRadius.full,
@@ -211,6 +221,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     marginTop: spacing.sm,
     padding: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -232,6 +244,7 @@ const styles = StyleSheet.create({
     color: colors.textLight,
     textAlign: 'center',
     paddingVertical: spacing.sm,
+    fontSize: fontSize.sm,
   },
   detailRow: {
     flexDirection: 'row',
@@ -266,13 +279,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   editButtonText: {
-    color: '#FFFFFF',
+    color: colors.background,
     fontWeight: '700',
     fontSize: fontSize.md,
   },
   deleteButton: {
     flex: 1,
-    backgroundColor: colors.surface,
+    backgroundColor: 'transparent',
     paddingVertical: spacing.md,
     borderRadius: borderRadius.md,
     alignItems: 'center',

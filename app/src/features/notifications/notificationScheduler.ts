@@ -50,6 +50,10 @@ function getNotificationDate(
 export async function scheduleNotification(
   sub: SchedulableSubscription,
 ): Promise<void> {
+  if (sub.notification_advance_days <= 0) {
+    return;
+  }
+
   const notifyDate = getNotificationDate(
     sub.next_payment_date,
     sub.notification_advance_days,

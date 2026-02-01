@@ -1,17 +1,57 @@
 export const colors = {
-  primary: '#4A90D9',
-  primaryDark: '#357ABD',
-  secondary: '#6C757D',
-  background: '#F8F9FA',
-  surface: '#FFFFFF',
-  text: '#212529',
-  textSecondary: '#6C757D',
-  textLight: '#ADB5BD',
-  border: '#DEE2E6',
-  error: '#DC3545',
-  success: '#28A745',
-  warning: '#FFC107',
-  danger: '#DC3545',
+  background: '#0D0D0D',
+  surface: '#1A1A1A',
+  surfaceLight: '#2A2A2A',
+  border: '#333333',
+  borderLight: '#444444',
+
+  primary: '#00D4AA',
+  primaryDark: '#00B893',
+  primaryMuted: '#00D4AA26',
+
+  text: '#FFFFFF',
+  textSecondary: '#9CA3AF',
+  textLight: '#6B7280',
+
+  error: '#FF4757',
+  success: '#2ED573',
+  warning: '#FFA502',
+  danger: '#FF4757',
+
+  categoryVideo: '#FF6B6B',
+  categoryMusic: '#51CF66',
+  categoryCloud: '#339AF0',
+  categoryAI: '#CC5DE8',
+  categorySports: '#FF922B',
+} as const;
+
+const categoryColorMap: Record<string, string> = {
+  video: colors.categoryVideo,
+  music: colors.categoryMusic,
+  cloud: colors.categoryCloud,
+  ai: colors.categoryAI,
+  sports: colors.categorySports,
+};
+
+export function categoryColor(category: string): string {
+  return categoryColorMap[category.toLowerCase()] || colors.primary;
+}
+
+export const shadows = {
+  card: {
+    shadowColor: '#000000',
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  elevated: {
+    shadowColor: '#000000',
+    shadowOffset: {width: 0, height: 8},
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 8,
+  },
 } as const;
 
 export const spacing = {

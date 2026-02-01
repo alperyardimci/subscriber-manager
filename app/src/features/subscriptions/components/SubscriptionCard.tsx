@@ -1,7 +1,8 @@
 import React from 'react';
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import {useTranslation} from 'react-i18next';
-import {colors, spacing, fontSize, borderRadius} from '../../../lib/theme';
+import i18n from '../../../i18n';
+import {colors, spacing, fontSize, borderRadius, categoryColor} from '../../../lib/theme';
 import type {Subscription} from '../../../lib/types';
 
 interface Props {
@@ -10,8 +11,9 @@ interface Props {
 }
 
 function formatDate(dateStr: string): string {
+  const locale = i18n.language === 'tr' ? 'tr-TR' : 'en-US';
   const date = new Date(dateStr);
-  return date.toLocaleDateString('tr-TR', {
+  return date.toLocaleDateString(locale, {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
@@ -29,6 +31,9 @@ function getDaysUntil(dateStr: string): number {
 export function SubscriptionCard({subscription, onPress}: Props) {
   const {t} = useTranslation();
   const daysUntil = getDaysUntil(subscription.next_payment_date);
+  const catColor = subscription.category
+    ? categoryColor(subscription.category)
+    : colors.primary;
 
   const cycleLabel =
     subscription.billing_cycle === 'monthly'
@@ -37,16 +42,16 @@ export function SubscriptionCard({subscription, onPress}: Props) {
         ? t('subscriptions.yearly')
         : `${subscription.custom_cycle_days} ${t('subscriptions.customDays')}`;
 
-  const urgencyColor =
+  const urgencyDotColor =
     daysUntil <= 2
       ? colors.danger
       : daysUntil <= 7
         ? colors.warning
-        : colors.textSecondary;
+        : null;
 
   return (
     <TouchableOpacity
-      style={styles.card}
+      style={[styles.card, {borderLeftColor: catColor}]}
       onPress={() => onPress(subscription.id)}
       activeOpacity={0.7}>
       <View style={styles.row}>
@@ -55,8 +60,8 @@ export function SubscriptionCard({subscription, onPress}: Props) {
             {subscription.name}
           </Text>
           <View style={styles.metaRow}>
-            <View style={styles.cycleBadge}>
-              <Text style={styles.cycleText}>{cycleLabel}</Text>
+            <View style={[styles.cycleBadge, {backgroundColor: catColor + '26'}]}>
+              <Text style={[styles.cycleText, {color: catColor}]}>{cycleLabel}</Text>
             </View>
             {subscription.category && (
               <Text style={styles.category}>{subscription.category}</Text>
@@ -67,9 +72,14 @@ export function SubscriptionCard({subscription, onPress}: Props) {
           <Text style={styles.amount}>
             {subscription.billing_amount.toFixed(2)} {subscription.currency}
           </Text>
-          <Text style={[styles.date, {color: urgencyColor}]}>
-            {formatDate(subscription.next_payment_date)}
-          </Text>
+          <View style={styles.dateRow}>
+            {urgencyDotColor && (
+              <View style={[styles.urgencyDot, {backgroundColor: urgencyDotColor}]} />
+            )}
+            <Text style={styles.date}>
+              {formatDate(subscription.next_payment_date)}
+            </Text>
+          </View>
         </View>
       </View>
     </TouchableOpacity>
@@ -83,11 +93,9 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     marginHorizontal: spacing.md,
     marginVertical: spacing.xs,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 1},
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderLeftWidth: 3,
   },
   row: {
     flexDirection: 'row',
@@ -110,14 +118,12 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   cycleBadge: {
-    backgroundColor: colors.primary + '15',
     paddingHorizontal: spacing.sm,
     paddingVertical: 2,
     borderRadius: borderRadius.sm,
   },
   cycleText: {
     fontSize: fontSize.xs,
-    color: colors.primary,
     fontWeight: '500',
   },
   category: {
@@ -133,7 +139,18 @@ const styles = StyleSheet.create({
     color: colors.text,
     marginBottom: spacing.xs,
   },
+  dateRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  urgencyDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
   date: {
     fontSize: fontSize.xs,
+    color: colors.textSecondary,
   },
 });

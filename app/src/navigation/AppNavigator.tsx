@@ -2,7 +2,8 @@ import React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {Text} from 'react-native';
+import {StyleSheet} from 'react-native';
+import Ionicons from '@react-native-vector-icons/ionicons';
 
 import {SubscriptionListScreen} from '../features/subscriptions/screens/SubscriptionListScreen';
 import {SubscriptionDetailScreen} from '../features/subscriptions/screens/SubscriptionDetailScreen';
@@ -24,8 +25,13 @@ function MainTabs() {
     <Tab.Navigator
       screenOptions={{
         tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.textSecondary,
-        headerStyle: {backgroundColor: colors.surface},
+        tabBarInactiveTintColor: colors.textLight,
+        tabBarStyle: {
+          backgroundColor: colors.surface,
+          borderTopColor: colors.border,
+          borderTopWidth: StyleSheet.hairlineWidth,
+        },
+        headerStyle: {backgroundColor: colors.background},
         headerTintColor: colors.text,
       }}>
       <Tab.Screen
@@ -33,8 +39,8 @@ function MainTabs() {
         component={SubscriptionListScreen}
         options={{
           title: t('tabs.subscriptions'),
-          tabBarIcon: ({color}) => (
-            <Text style={{fontSize: 20, color}}>{'📋'}</Text>
+          tabBarIcon: ({color, size}) => (
+            <Ionicons name="card-outline" size={size} color={color} />
           ),
         }}
       />
@@ -43,8 +49,8 @@ function MainTabs() {
         component={SettingsScreen}
         options={{
           title: t('tabs.settings'),
-          tabBarIcon: ({color}) => (
-            <Text style={{fontSize: 20, color}}>{'⚙️'}</Text>
+          tabBarIcon: ({color, size}) => (
+            <Ionicons name="settings-outline" size={size} color={color} />
           ),
         }}
       />
@@ -59,8 +65,10 @@ export function AppNavigator() {
     <NavigationContainer>
       <Stack.Navigator
         screenOptions={{
-          headerStyle: {backgroundColor: colors.surface},
+          headerStyle: {backgroundColor: colors.background},
           headerTintColor: colors.text,
+          contentStyle: {backgroundColor: colors.background},
+          headerBackTitle: t('common.back'),
         }}>
         <Stack.Screen
           name="MainTabs"
@@ -75,14 +83,17 @@ export function AppNavigator() {
         <Stack.Screen
           name="SubscriptionForm"
           component={SubscriptionFormScreen}
+          options={{title: t('subscriptions.addNew')}}
         />
         <Stack.Screen
           name="SubscriptionDetail"
           component={SubscriptionDetailScreen}
+          options={{title: t('subscriptions.detail')}}
         />
         <Stack.Screen
           name="CredentialForm"
           component={CredentialFormScreen}
+          options={{title: t('credentials.add')}}
         />
       </Stack.Navigator>
     </NavigationContainer>

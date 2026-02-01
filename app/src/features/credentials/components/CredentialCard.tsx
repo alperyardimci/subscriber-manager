@@ -56,6 +56,8 @@ export function CredentialCard({credential}: Props) {
         </TouchableOpacity>
       </View>
 
+      <View style={styles.separator} />
+
       <View style={styles.fieldRow}>
         <View style={styles.fieldInfo}>
           <Text style={styles.fieldLabel}>{t('credentials.password')}</Text>
@@ -89,14 +91,14 @@ export function CredentialCard({credential}: Props) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.background,
+    backgroundColor: colors.surfaceLight,
     borderRadius: borderRadius.md,
     padding: spacing.sm,
     marginVertical: spacing.xs,
   },
   url: {
     fontSize: fontSize.xs,
-    color: colors.textSecondary,
+    color: colors.textLight,
     marginBottom: spacing.sm,
   },
   fieldRow: {
@@ -116,6 +118,11 @@ const styles = StyleSheet.create({
     fontSize: fontSize.sm,
     color: colors.text,
     fontWeight: '500',
+  },
+  separator: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: colors.border,
+    marginVertical: spacing.xs,
   },
   passwordActions: {
     flexDirection: 'row',

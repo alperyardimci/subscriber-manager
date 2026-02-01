@@ -6,7 +6,7 @@
   "subscriptions": {
     "title": "Abonelikler",
     "empty": "Henüz abonelik eklenmedi",
-    "emptyAction": "İlk aboneliğini ekle",
+    "emptyAction": "İlk Aboneliğini Ekle",
     "addNew": "Yeni Abonelik",
     "edit": "Aboneliği Düzenle",
     "detail": "Abonelik Detayı",
@@ -24,18 +24,38 @@
     "yearly": "Yıllık",
     "custom": "Özel",
     "customDays": "Gün Sayısı",
+    "daysUnit": "gün",
     "nextPayment": "Sonraki Ödeme",
-    "notifyBefore": "Önceden Bildirim (gün)",
+    "notifyBefore": "Önceden Bildirim",
+    "notifyBeforeDays": "Önceden Bildirim (gün)",
     "category": "Kategori",
+    "categoryPlaceholder": "Kategori adı girin...",
+    "categoryOther": "Diğer",
+    "categoryVideo": "Video",
+    "categoryMusic": "Müzik",
+    "categoryCloud": "Bulut",
+    "categoryAI": "Yapay Zeka",
+    "categorySports": "Spor",
     "notes": "Notlar",
     "totalMonthly": "Aylık Toplam",
     "totalYearly": "Yıllık Toplam",
+    "upcomingPayments": "Gelecek 30 Gün",
+    "noUpcoming": "Yaklaşan ödeme yok",
+    "filterAll": "Tümü",
+    "reminderEnabled": "Ödeme Hatırlatma",
+    "reminderOff": "Kapalı",
+    "subscriptionCount": "{{count}} abonelik",
     "credentials": "Kimlik Bilgileri",
-    "addCredential": "Kimlik Bilgisi Ekle",
+    "addCredential": "+ Kimlik Bilgisi Ekle",
     "namePlaceholder": "örn. Netflix, Spotify",
     "urlPlaceholder": "örn. https://netflix.com",
     "amountPlaceholder": "0.00",
-    "notesPlaceholder": "İsteğe bağlı notlar..."
+    "notesPlaceholder": "İsteğe bağlı notlar...",
+    "datePlaceholder": "örn. 2025-03-15",
+    "validationNameRequired": "Lütfen abonelik adını girin.",
+    "validationAmountRequired": "Lütfen geçerli bir tutar girin.",
+    "validationCustomDaysRequired": "Lütfen geçerli bir gün sayısı girin.",
+    "noCredentials": "Henüz kimlik bilgisi eklenmedi"
   },
   "credentials": {
     "title": "Kimlik Bilgileri",
@@ -44,6 +64,7 @@
     "serviceUrl": "Servis URL'si",
     "username": "Kullanıcı Adı / E-posta",
     "password": "Şifre",
+    "passwordChangePlaceholder": "(değiştirmek için girin)",
     "reveal": "Göster",
     "hide": "Gizle",
     "copy": "Kopyala",
@@ -52,7 +73,9 @@
     "cancel": "İptal",
     "biometricPrompt": "Şifreyi görmek için doğrulama gerekli",
     "urlPlaceholder": "örn. https://netflix.com",
-    "usernamePlaceholder": "örn. kullanici@email.com"
+    "usernamePlaceholder": "örn. kullanici@email.com",
+    "validationUsernameRequired": "Lütfen kullanıcı adı girin.",
+    "validationPasswordRequired": "Lütfen şifre girin."
   },
   "settings": {
     "title": "Ayarlar",
@@ -62,7 +85,7 @@
     "notificationPermission": "Bildirim İzni",
     "permissionGranted": "İzin Verildi",
     "permissionDenied": "İzin Reddedildi",
-    "openSettings": "Ayarları Aç",
+    "openSettings": "Sistem Ayarları",
     "language": "Dil",
     "turkish": "Türkçe",
     "english": "İngilizce",
@@ -70,17 +93,18 @@
     "autofillEnabled": "Etkin",
     "autofillDisabled": "Devre Dışı",
     "autofillSetup": "Kurulum",
+    "autofillLabel": "Otomatik Doldurma",
     "about": "Hakkında",
     "version": "Sürüm"
   },
   "templates": {
-    "title": "Popüler Servisler",
-    "manualAdd": "Manuel Ekle",
+    "title": "Abonelik Ekle",
+    "manualAdd": "Manuel Olarak Ekle",
     "selectTemplate": "Şablon Seç",
     "categories": {
       "video": "Video",
       "music": "Müzik",
-      "cloud": "Bulut",
+      "cloud": "Bulut Depolama",
       "ai": "Yapay Zeka",
       "sports": "Spor"
     },
@@ -112,6 +136,7 @@
     "back": "Geri",
     "loading": "Yükleniyor...",
     "error": "Hata",
-    "success": "Başarılı"
+    "success": "Başarılı",
+    "add": "Ekle"
   }
 }

@@ -51,6 +51,20 @@ const migrations: Migration[] = [
       `);
     },
   },
+  {
+    version: 2,
+    up: (db: QuickSQLiteConnection) => {
+      db.execute(`
+        CREATE TABLE IF NOT EXISTS app_settings (
+          key TEXT PRIMARY KEY,
+          value TEXT NOT NULL
+        );
+      `);
+      db.execute(
+        "INSERT OR IGNORE INTO app_settings (key, value) VALUES ('default_advance_days', '2')",
+      );
+    },
+  },
 ];
 
 export async function runMigrations(db: QuickSQLiteConnection): Promise<void> {

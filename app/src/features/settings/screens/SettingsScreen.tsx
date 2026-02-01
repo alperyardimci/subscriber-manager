@@ -10,9 +10,19 @@ import {
   Platform,
 } from 'react-native';
 import {useTranslation} from 'react-i18next';
+import Ionicons from '@react-native-vector-icons/ionicons';
 import i18n from '../../../i18n';
 import {requestPermissions} from '../../notifications/notificationService';
+import {
+  getDefaultAdvanceDays,
+  setDefaultAdvanceDays as saveDefaultAdvanceDays,
+} from '../../../db/repositories/settingsRepository';
 import {colors, spacing, fontSize, borderRadius} from '../../../lib/theme';
+
+const LANGUAGES = [
+  {code: 'tr', label: 'Türkçe'},
+  {code: 'en', label: 'English'},
+] as const;
 
 export function SettingsScreen() {
   const {t} = useTranslation();
@@ -22,6 +32,7 @@ export function SettingsScreen() {
 
   useEffect(() => {
     checkPermissions();
+    getDefaultAdvanceDays().then(setDefaultAdvanceDays);
   }, []);
 
   async function checkPermissions() {
@@ -29,10 +40,9 @@ export function SettingsScreen() {
     setNotificationsEnabled(granted);
   }
 
-  function toggleLanguage() {
-    const newLang = currentLang === 'tr' ? 'en' : 'tr';
-    i18n.changeLanguage(newLang);
-    setCurrentLang(newLang);
+  function selectLanguage(langCode: string) {
+    i18n.changeLanguage(langCode);
+    setCurrentLang(langCode);
   }
 
   function openNotificationSettings() {
@@ -46,7 +56,7 @@ export function SettingsScreen() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('settings.notifications')}</Text>
+        <Text style={styles.sectionTitle}>{t('settings.notifications').toUpperCase()}</Text>
 
         <View style={styles.row}>
           <Text style={styles.rowLabel}>{t('settings.notificationsEnabled')}</Text>
@@ -59,7 +69,8 @@ export function SettingsScreen() {
                 checkPermissions();
               }
             }}
-            trackColor={{true: colors.primary}}
+            trackColor={{false: colors.border, true: colors.primary}}
+            thumbColor={colors.text}
           />
         </View>
 
@@ -68,52 +79,60 @@ export function SettingsScreen() {
           <View style={styles.stepper}>
             <TouchableOpacity
               style={styles.stepperButton}
-              onPress={() =>
-                setDefaultAdvanceDays(Math.max(1, defaultAdvanceDays - 1))
-              }>
-              <Text style={styles.stepperText}>-</Text>
+              onPress={() => {
+                const next = Math.max(1, defaultAdvanceDays - 1);
+                setDefaultAdvanceDays(next);
+                saveDefaultAdvanceDays(next);
+              }}>
+              <Ionicons name="remove" size={18} color={colors.text} />
             </TouchableOpacity>
             <Text style={styles.stepperValue}>{defaultAdvanceDays}</Text>
             <TouchableOpacity
               style={styles.stepperButton}
-              onPress={() => setDefaultAdvanceDays(defaultAdvanceDays + 1)}>
-              <Text style={styles.stepperText}>+</Text>
+              onPress={() => {
+                const next = defaultAdvanceDays + 1;
+                setDefaultAdvanceDays(next);
+                saveDefaultAdvanceDays(next);
+              }}>
+              <Ionicons name="add" size={18} color={colors.text} />
             </TouchableOpacity>
           </View>
         </View>
 
         <TouchableOpacity style={styles.row} onPress={openNotificationSettings}>
           <Text style={styles.rowLabel}>{t('settings.openSettings')}</Text>
-          <Text style={styles.rowChevron}>{'>'}</Text>
+          <Ionicons name="chevron-forward" size={18} color={colors.textLight} />
         </TouchableOpacity>
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('settings.language')}</Text>
-        <TouchableOpacity style={styles.row} onPress={toggleLanguage}>
-          <Text style={styles.rowLabel}>
-            {currentLang === 'tr'
-              ? t('settings.turkish')
-              : t('settings.english')}
-          </Text>
-          <Text style={styles.rowValue}>
-            {currentLang === 'tr' ? 'TR' : 'EN'}
-          </Text>
-        </TouchableOpacity>
+        <Text style={styles.sectionTitle}>{t('settings.language').toUpperCase()}</Text>
+        {LANGUAGES.map(lang => {
+          const isSelected = currentLang === lang.code;
+          return (
+            <TouchableOpacity
+              key={lang.code}
+              style={styles.row}
+              onPress={() => selectLanguage(lang.code)}>
+              <Text style={styles.rowLabel}>{lang.label}</Text>
+              {isSelected ? (
+                <Ionicons name="checkmark" size={20} color={colors.primary} />
+              ) : null}
+            </TouchableOpacity>
+          );
+        })}
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('settings.autofill')}</Text>
+        <Text style={styles.sectionTitle}>{t('settings.autofill').toUpperCase()}</Text>
         <View style={styles.row}>
-          <Text style={styles.rowLabel}>
-            {Platform.OS === 'ios' ? 'iOS AutoFill' : 'Android Autofill'}
-          </Text>
+          <Text style={styles.rowLabel}>{t('settings.autofillLabel')}</Text>
           <Text style={styles.rowValue}>{t('settings.autofillSetup')}</Text>
         </View>
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('settings.about')}</Text>
+        <Text style={styles.sectionTitle}>{t('settings.about').toUpperCase()}</Text>
         <View style={styles.row}>
           <Text style={styles.rowLabel}>{t('settings.version')}</Text>
           <Text style={styles.rowValue}>1.0.0</Text>
@@ -137,7 +156,6 @@ const styles = StyleSheet.create({
     fontSize: fontSize.xs,
     fontWeight: '700',
     color: colors.textSecondary,
-    textTransform: 'uppercase',
     paddingVertical: spacing.sm,
     letterSpacing: 0.5,
   },
@@ -157,10 +175,6 @@ const styles = StyleSheet.create({
     fontSize: fontSize.md,
     color: colors.textSecondary,
   },
-  rowChevron: {
-    fontSize: fontSize.md,
-    color: colors.textLight,
-  },
   stepper: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -170,16 +184,11 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: borderRadius.full,
-    backgroundColor: colors.background,
+    backgroundColor: colors.surfaceLight,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: colors.border,
-  },
-  stepperText: {
-    fontSize: fontSize.lg,
-    color: colors.text,
-    fontWeight: '600',
+    borderColor: colors.borderLight,
   },
   stepperValue: {
     fontSize: fontSize.md,
