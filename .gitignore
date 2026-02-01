@@ -1,0 +1,29 @@
+# Dependencies
+app/node_modules/
+
+# iOS
+app/ios/Pods/
+app/ios/build/
+app/ios/DerivedData/
+*.xcuserstate
+*.xcuserdatad
+
+# Android
+app/android/.gradle/
+app/android/app/build/
+app/android/build/
+*.apk
+*.aab
+
+# Metro
+app/.metro-health-check*
+
+# Bundle
+app/.bundle/
+
+# macOS
+.DS_Store
+
+# Env
+.env
+.env.*
