@@ -26,9 +26,19 @@ export interface Credential {
 
 export type BillingCycle = 'monthly' | 'yearly' | 'custom';
 
+export interface SubscriptionTemplate {
+  id: string;
+  nameKey: string;
+  icon: string;
+  serviceUrl: string;
+  category: string;
+  defaultBillingCycle: 'monthly' | 'yearly';
+}
+
 export type RootStackParamList = {
   MainTabs: undefined;
-  SubscriptionForm: { subscriptionId?: string } | undefined;
+  TemplatePicker: undefined;
+  SubscriptionForm: { subscriptionId?: string; template?: SubscriptionTemplate } | undefined;
   SubscriptionDetail: { subscriptionId: string };
   CredentialForm: { subscriptionId: string; credentialId?: string };
 };

@@ -102,7 +102,7 @@ export function SubscriptionListScreen() {
 
       <TouchableOpacity
         style={styles.fab}
-        onPress={() => navigation.navigate('SubscriptionForm')}
+        onPress={() => navigation.navigate('TemplatePicker')}
         activeOpacity={0.8}>
         <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>

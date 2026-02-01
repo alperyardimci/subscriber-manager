@@ -73,6 +73,36 @@
     "about": "About",
     "version": "Version"
   },
+  "templates": {
+    "title": "Popular Services",
+    "manualAdd": "Add Manually",
+    "selectTemplate": "Choose Template",
+    "categories": {
+      "video": "Video",
+      "music": "Music",
+      "cloud": "Cloud",
+      "ai": "AI",
+      "sports": "Sports"
+    },
+    "netflix": "Netflix",
+    "disneyPlus": "Disney+",
+    "bluTV": "BluTV",
+    "exxen": "Exxen",
+    "amazonPrimeVideo": "Amazon Prime Video",
+    "appleTVPlus": "Apple TV+",
+    "turkcellTVPlus": "Turkcell TV+",
+    "beinConnect": "beIN Connect",
+    "spotify": "Spotify",
+    "appleMusic": "Apple Music",
+    "youtubePremium": "YouTube Premium",
+    "tidal": "Tidal",
+    "iCloud": "iCloud",
+    "googleOne": "Google One",
+    "chatGPTPlus": "ChatGPT Plus",
+    "copilotPro": "Copilot Pro",
+    "dazn": "DAZN",
+    "beinConnectSpor": "beIN Connect Sports"
+  },
   "common": {
     "ok": "OK",
     "cancel": "Cancel",

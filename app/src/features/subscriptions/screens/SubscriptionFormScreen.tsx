@@ -29,19 +29,28 @@ export function SubscriptionFormScreen() {
   const navigation = useNavigation<NavProp>();
   const route = useRoute<RouteType>();
   const editId = route.params?.subscriptionId;
+  const template = route.params?.template;
   const isEditing = !!editId;
 
-  const [name, setName] = useState('');
-  const [serviceUrl, setServiceUrl] = useState('');
+  const [name, setName] = useState(() =>
+    template && !editId ? t(template.nameKey) : '',
+  );
+  const [serviceUrl, setServiceUrl] = useState(() =>
+    template && !editId ? template.serviceUrl : '',
+  );
   const [amount, setAmount] = useState('');
   const [currency, setCurrency] = useState('TRY');
-  const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
+  const [billingCycle, setBillingCycle] = useState<BillingCycle>(() =>
+    template && !editId ? template.defaultBillingCycle : 'monthly',
+  );
   const [customDays, setCustomDays] = useState('');
   const [nextPaymentDate, setNextPaymentDate] = useState(
     new Date().toISOString().split('T')[0],
   );
   const [advanceDays, setAdvanceDays] = useState('2');
-  const [category, setCategory] = useState('');
+  const [category, setCategory] = useState(() =>
+    template && !editId ? template.category : '',
+  );
   const [notes, setNotes] = useState('');
 
   useEffect(() => {
@@ -49,6 +58,15 @@ export function SubscriptionFormScreen() {
       loadExisting(editId);
     }
   }, [editId]);
+
+  useEffect(() => {
+    if (template && !editId) {
+      setName(t(template.nameKey));
+      setServiceUrl(template.serviceUrl);
+      setBillingCycle(template.defaultBillingCycle);
+      setCategory(template.category);
+    }
+  }, [template?.id]);
 
   useEffect(() => {
     navigation.setOptions({

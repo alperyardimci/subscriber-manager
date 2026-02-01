@@ -73,6 +73,36 @@
     "about": "Hakkında",
     "version": "Sürüm"
   },
+  "templates": {
+    "title": "Popüler Servisler",
+    "manualAdd": "Manuel Ekle",
+    "selectTemplate": "Şablon Seç",
+    "categories": {
+      "video": "Video",
+      "music": "Müzik",
+      "cloud": "Bulut",
+      "ai": "Yapay Zeka",
+      "sports": "Spor"
+    },
+    "netflix": "Netflix",
+    "disneyPlus": "Disney+",
+    "bluTV": "BluTV",
+    "exxen": "Exxen",
+    "amazonPrimeVideo": "Amazon Prime Video",
+    "appleTVPlus": "Apple TV+",
+    "turkcellTVPlus": "Turkcell TV+",
+    "beinConnect": "beIN Connect",
+    "spotify": "Spotify",
+    "appleMusic": "Apple Music",
+    "youtubePremium": "YouTube Premium",
+    "tidal": "Tidal",
+    "iCloud": "iCloud",
+    "googleOne": "Google One",
+    "chatGPTPlus": "ChatGPT Plus",
+    "copilotPro": "Copilot Pro",
+    "dazn": "DAZN",
+    "beinConnectSpor": "beIN Connect Spor"
+  },
   "common": {
     "ok": "Tamam",
     "cancel": "İptal",

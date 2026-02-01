@@ -8,6 +8,7 @@ import {SubscriptionListScreen} from '../features/subscriptions/screens/Subscrip
 import {SubscriptionDetailScreen} from '../features/subscriptions/screens/SubscriptionDetailScreen';
 import {SubscriptionFormScreen} from '../features/subscriptions/screens/SubscriptionFormScreen';
 import {CredentialFormScreen} from '../features/credentials/screens/CredentialFormScreen';
+import {TemplatePickerScreen} from '../features/subscriptions/screens/TemplatePickerScreen';
 import {SettingsScreen} from '../features/settings/screens/SettingsScreen';
 import {useTranslation} from 'react-i18next';
 import {colors} from '../lib/theme';
@@ -52,6 +53,8 @@ function MainTabs() {
 }
 
 export function AppNavigator() {
+  const {t} = useTranslation();
+
   return (
     <NavigationContainer>
       <Stack.Navigator
@@ -63,6 +66,11 @@ export function AppNavigator() {
           name="MainTabs"
           component={MainTabs}
           options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="TemplatePicker"
+          component={TemplatePickerScreen}
+          options={{title: t('templates.title')}}
         />
         <Stack.Screen
           name="SubscriptionForm"
