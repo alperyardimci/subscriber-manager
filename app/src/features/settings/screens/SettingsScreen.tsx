@@ -107,20 +107,28 @@ export function SettingsScreen() {
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>{t('settings.language').toUpperCase()}</Text>
-        {LANGUAGES.map(lang => {
-          const isSelected = currentLang === lang.code;
-          return (
-            <TouchableOpacity
-              key={lang.code}
-              style={styles.row}
-              onPress={() => selectLanguage(lang.code)}>
-              <Text style={styles.rowLabel}>{lang.label}</Text>
-              {isSelected ? (
-                <Ionicons name="checkmark" size={20} color={colors.primary} />
-              ) : null}
-            </TouchableOpacity>
-          );
-        })}
+        <View style={styles.langSegmentRow}>
+          {LANGUAGES.map(lang => {
+            const isSelected = currentLang === lang.code;
+            return (
+              <TouchableOpacity
+                key={lang.code}
+                style={[
+                  styles.langSegment,
+                  isSelected && styles.langSegmentSelected,
+                ]}
+                onPress={() => selectLanguage(lang.code)}>
+                <Text
+                  style={[
+                    styles.langSegmentText,
+                    isSelected && styles.langSegmentTextSelected,
+                  ]}>
+                  {lang.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
       </View>
 
       <View style={styles.section}>
@@ -135,7 +143,7 @@ export function SettingsScreen() {
         <Text style={styles.sectionTitle}>{t('settings.about').toUpperCase()}</Text>
         <View style={styles.row}>
           <Text style={styles.rowLabel}>{t('settings.version')}</Text>
-          <Text style={styles.rowValue}>1.0.0</Text>
+          <Text style={styles.rowValue}>1.0</Text>
         </View>
       </View>
     </ScrollView>
@@ -196,5 +204,32 @@ const styles = StyleSheet.create({
     color: colors.text,
     minWidth: 24,
     textAlign: 'center',
+  },
+  langSegmentRow: {
+    flexDirection: 'row',
+    gap: spacing.xs,
+    paddingVertical: spacing.sm,
+  },
+  langSegment: {
+    flex: 1,
+    paddingVertical: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: borderRadius.full,
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+  },
+  langSegmentSelected: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  langSegmentText: {
+    fontSize: fontSize.sm,
+    color: colors.text,
+    fontWeight: '500',
+  },
+  langSegmentTextSelected: {
+    color: colors.background,
+    fontWeight: '700',
   },
 });

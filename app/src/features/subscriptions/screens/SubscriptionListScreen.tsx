@@ -6,6 +6,9 @@ import {
   StyleSheet,
   TouchableOpacity,
   RefreshControl,
+  LayoutAnimation,
+  Platform,
+  UIManager,
 } from 'react-native';
 import {useTranslation} from 'react-i18next';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
@@ -16,8 +19,36 @@ import {SubscriptionCard} from '../components/SubscriptionCard';
 import {colors, spacing, fontSize, borderRadius} from '../../../lib/theme';
 import type {Subscription, RootStackParamList, BillingCycle} from '../../../lib/types';
 
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
 type NavProp = NativeStackNavigationProp<RootStackParamList>;
 type FilterType = 'all' | BillingCycle;
+
+const CURRENCY_ORDER = ['TRY', 'USD', 'EUR'];
+
+function sortCurrencies(totals: Record<string, number>): string[] {
+  return Object.keys(totals).sort(
+    (a, b) => CURRENCY_ORDER.indexOf(a) - CURRENCY_ORDER.indexOf(b),
+  );
+}
+
+function CurrencyRow({totals, currencies}: {totals: Record<string, number>; currencies: string[]}) {
+  return (
+    <View style={styles.currencyRow}>
+      {currencies.map((cur, i) => (
+        <React.Fragment key={cur}>
+          {i > 0 && <Text style={styles.plusSign}>+</Text>}
+          <Text style={styles.currencyAmount}>
+            {totals[cur].toFixed(2)}{' '}
+            <Text style={styles.currencyCode}>{cur}</Text>
+          </Text>
+        </React.Fragment>
+      ))}
+    </View>
+  );
+}
 
 export function SubscriptionListScreen() {
   const {t} = useTranslation();
@@ -25,6 +56,7 @@ export function SubscriptionListScreen() {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<FilterType>('all');
+  const [yearlyExpanded, setYearlyExpanded] = useState(false);
 
   const loadSubscriptions = useCallback(async () => {
     try {
@@ -66,10 +98,23 @@ export function SubscriptionListScreen() {
     return acc;
   }, {});
 
-  const primaryCurrency = Object.keys(upcomingTotals).sort(
-    (a, b) => upcomingTotals[b] - upcomingTotals[a],
-  )[0] || 'TRY';
-  const upcomingTotal = upcomingTotals[primaryCurrency] || 0;
+  const yearlyTotals = subscriptions.reduce<Record<string, number>>((acc, sub) => {
+    let annualAmount: number;
+    if (sub.billing_cycle === 'yearly') {
+      annualAmount = sub.billing_amount;
+    } else if (sub.billing_cycle === 'monthly') {
+      annualAmount = sub.billing_amount * 12;
+    } else {
+      const days = sub.custom_cycle_days || 30;
+      annualAmount = sub.billing_amount * (365 / days);
+    }
+    acc[sub.currency] = (acc[sub.currency] || 0) + annualAmount;
+    return acc;
+  }, {});
+
+  const sortedUpcoming = sortCurrencies(upcomingTotals);
+  const sortedYearly = sortCurrencies(yearlyTotals);
+  const hasUpcoming = sortedUpcoming.length > 0;
 
   const filters: {key: FilterType; label: string}[] = [
     {key: 'all', label: t('subscriptions.filterAll')},
@@ -77,6 +122,11 @@ export function SubscriptionListScreen() {
     {key: 'yearly', label: t('subscriptions.yearly')},
     {key: 'custom', label: t('subscriptions.custom')},
   ];
+
+  function toggleYearly() {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setYearlyExpanded(prev => !prev);
+  }
 
   const renderEmpty = () => {
     if (subscriptions.length > 0 && filteredSubscriptions.length === 0) {
@@ -101,17 +151,40 @@ export function SubscriptionListScreen() {
     <View style={styles.container}>
       {subscriptions.length > 0 && (
         <View style={styles.heroSection}>
-          <View style={styles.heroTop}>
-            <Text style={styles.heroLabel}>{t('subscriptions.upcomingPayments').toUpperCase()}</Text>
-            <Text style={styles.heroCount}>
-              {t('subscriptions.subscriptionCount', {count: subscriptions.length})}
-            </Text>
+          {/* Upcoming 30 days */}
+          <View style={styles.heroMain}>
+            <View style={styles.heroTop}>
+              <Text style={styles.heroLabel}>{t('subscriptions.upcomingPayments').toUpperCase()}</Text>
+              <Text style={styles.heroCount}>
+                {t('subscriptions.subscriptionCount', {count: subscriptions.length})}
+              </Text>
+            </View>
+            {hasUpcoming ? (
+              <CurrencyRow totals={upcomingTotals} currencies={sortedUpcoming} />
+            ) : (
+              <Text style={styles.noUpcoming}>{t('subscriptions.noUpcoming')}</Text>
+            )}
           </View>
-          <Text style={styles.heroAmount}>
-            {upcomingTotal > 0
-              ? `${upcomingTotal.toFixed(2)} ${primaryCurrency}`
-              : t('subscriptions.noUpcoming')}
-          </Text>
+
+          {/* Yearly accordion */}
+          {sortedYearly.length > 0 && (
+            <View style={styles.accordionWrapper}>
+              <TouchableOpacity
+                style={styles.accordionHeader}
+                onPress={toggleYearly}
+                activeOpacity={0.7}>
+                <Text style={styles.accordionLabel}>{t('subscriptions.totalYearly').toUpperCase()}</Text>
+                <Text style={styles.accordionChevron}>
+                  {yearlyExpanded ? '▲' : '▼'}
+                </Text>
+              </TouchableOpacity>
+              {yearlyExpanded && (
+                <View style={styles.accordionBody}>
+                  <CurrencyRow totals={yearlyTotals} currencies={sortedYearly} />
+                </View>
+              )}
+            </View>
+          )}
         </View>
       )}
 
@@ -177,30 +250,78 @@ const styles = StyleSheet.create({
   },
   heroSection: {
     backgroundColor: colors.surface,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.lg,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
+  },
+  heroMain: {
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.md,
   },
   heroTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: spacing.xs,
+    marginBottom: spacing.sm,
   },
   heroLabel: {
     color: colors.textSecondary,
     fontSize: fontSize.xs,
+    fontWeight: '600',
     letterSpacing: 1,
   },
   heroCount: {
     color: colors.textLight,
     fontSize: fontSize.xs,
   },
-  heroAmount: {
+  noUpcoming: {
+    color: colors.textLight,
+    fontSize: fontSize.lg,
+  },
+  currencyRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  currencyAmount: {
     color: colors.text,
-    fontSize: fontSize.xxl,
+    fontSize: fontSize.xl,
     fontWeight: '700',
+  },
+  currencyCode: {
+    fontSize: fontSize.sm,
+    fontWeight: '500',
+    color: colors.textSecondary,
+  },
+  plusSign: {
+    color: colors.textLight,
+    fontSize: fontSize.md,
+    fontWeight: '600',
+  },
+  accordionWrapper: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.border,
+    marginHorizontal: spacing.md,
+  },
+  accordionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: spacing.sm + 2,
+  },
+  accordionLabel: {
+    color: colors.textSecondary,
+    fontSize: fontSize.xs,
+    fontWeight: '600',
+    letterSpacing: 1,
+  },
+  accordionChevron: {
+    color: colors.textSecondary,
+    fontSize: fontSize.xs,
+  },
+  accordionBody: {
+    paddingBottom: spacing.sm + 2,
   },
   filterRow: {
     flexDirection: 'row',

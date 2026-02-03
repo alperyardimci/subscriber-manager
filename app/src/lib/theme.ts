@@ -23,6 +23,10 @@ export const colors = {
   categoryCloud: '#339AF0',
   categoryAI: '#CC5DE8',
   categorySports: '#FF922B',
+  categoryProductivity: '#F59F00',
+  categoryGaming: '#F06595',
+  categoryEducation: '#20C997',
+  categoryNews: '#FCC419',
 } as const;
 
 const categoryColorMap: Record<string, string> = {
@@ -31,6 +35,10 @@ const categoryColorMap: Record<string, string> = {
   cloud: colors.categoryCloud,
   ai: colors.categoryAI,
   sports: colors.categorySports,
+  productivity: colors.categoryProductivity,
+  gaming: colors.categoryGaming,
+  education: colors.categoryEducation,
+  news: colors.categoryNews,
 };
 
 export function categoryColor(category: string): string {

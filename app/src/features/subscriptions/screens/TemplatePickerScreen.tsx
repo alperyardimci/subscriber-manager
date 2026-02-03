@@ -16,7 +16,7 @@ import {SUBSCRIPTION_TEMPLATES} from '../data/templates';
 
 type NavProp = NativeStackNavigationProp<RootStackParamList>;
 
-const CATEGORY_ORDER = ['video', 'music', 'cloud', 'ai', 'sports'];
+const CATEGORY_ORDER = ['video', 'music', 'cloud', 'ai', 'sports', 'productivity', 'gaming', 'education', 'news'];
 
 export function TemplatePickerScreen() {
   const {t} = useTranslation();
@@ -65,7 +65,9 @@ export function TemplatePickerScreen() {
               activeOpacity={0.7}
               accessibilityRole="button"
               accessibilityLabel={`${t(item.nameKey)}, ${t(`templates.categories.${item.category}`)}`}>
-              <Text style={styles.templateIcon}>{item.icon}</Text>
+              <View style={[styles.brandAvatar, {backgroundColor: item.brandColor}]}>
+                <Text style={styles.brandAvatarText}>{item.icon}</Text>
+              </View>
               <Text style={styles.templateName} numberOfLines={2}>
                 {t(item.nameKey)}
               </Text>
@@ -157,9 +159,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     minHeight: 88,
   },
-  templateIcon: {
-    fontSize: 32,
+  brandAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: borderRadius.md,
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: spacing.xs,
+  },
+  brandAvatarText: {
+    color: '#FFFFFF',
+    fontSize: fontSize.sm,
+    fontWeight: '800',
   },
   templateName: {
     fontSize: fontSize.xs,

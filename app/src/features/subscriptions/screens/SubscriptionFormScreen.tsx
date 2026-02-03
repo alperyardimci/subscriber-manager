@@ -49,9 +49,11 @@ export function SubscriptionFormScreen() {
     template && !editId ? template.defaultBillingCycle : 'monthly',
   );
   const [customDays, setCustomDays] = useState('');
-  const [nextPaymentDate, setNextPaymentDate] = useState(
-    new Date().toISOString().split('T')[0],
-  );
+  const [nextPaymentDate, setNextPaymentDate] = useState(() => {
+    const d = new Date();
+    d.setMonth(d.getMonth() + 1);
+    return d.toISOString().split('T')[0];
+  });
   const [reminderEnabled, setReminderEnabled] = useState(true);
   const [advanceDays, setAdvanceDays] = useState('');
   const [category, setCategory] = useState(() =>
@@ -67,6 +69,10 @@ export function SubscriptionFormScreen() {
     {key: 'cloud', labelKey: 'subscriptions.categoryCloud'},
     {key: 'ai', labelKey: 'subscriptions.categoryAI'},
     {key: 'sports', labelKey: 'subscriptions.categorySports'},
+    {key: 'productivity', labelKey: 'subscriptions.categoryProductivity'},
+    {key: 'gaming', labelKey: 'subscriptions.categoryGaming'},
+    {key: 'education', labelKey: 'subscriptions.categoryEducation'},
+    {key: 'news', labelKey: 'subscriptions.categoryNews'},
   ] as const;
 
   useEffect(() => {
@@ -110,7 +116,7 @@ export function SubscriptionFormScreen() {
       }
       const cat = sub.category || '';
       setCategory(cat);
-      if (cat && !['video', 'music', 'cloud', 'ai', 'sports'].includes(cat)) {
+      if (cat && !['video', 'music', 'cloud', 'ai', 'sports', 'productivity', 'gaming', 'education', 'news'].includes(cat)) {
         setIsOtherCategory(true);
       }
       setNotes(sub.notes || '');
@@ -199,7 +205,7 @@ export function SubscriptionFormScreen() {
             <TextInput
               style={styles.input}
               value={amount}
-              onChangeText={setAmount}
+              onChangeText={text => setAmount(text.replace(',', '.'))}
               placeholder={t('subscriptions.amountPlaceholder')}
               placeholderTextColor={colors.textLight}
               keyboardType="decimal-pad"

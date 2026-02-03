@@ -30,6 +30,7 @@ export interface SubscriptionTemplate {
   id: string;
   nameKey: string;
   icon: string;
+  brandColor: string;
   serviceUrl: string;
   category: string;
   defaultBillingCycle: 'monthly' | 'yearly';
