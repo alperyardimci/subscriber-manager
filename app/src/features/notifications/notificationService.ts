@@ -45,6 +45,23 @@ export async function scheduleLocalNotification(
   );
 }
 
+export async function displayImmediateNotification(
+  id: string,
+  title: string,
+  body: string,
+): Promise<void> {
+  await notifee.displayNotification({
+    id,
+    title,
+    body,
+    android: {
+      channelId: CHANNEL_ID,
+      importance: AndroidImportance.HIGH,
+      pressAction: {id: 'default'},
+    },
+  });
+}
+
 export async function cancelLocalNotification(id: string): Promise<void> {
   await notifee.cancelNotification(id);
 }

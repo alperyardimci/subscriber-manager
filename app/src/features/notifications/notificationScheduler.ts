@@ -1,6 +1,7 @@
 import {
   scheduleLocalNotification,
   cancelLocalNotification,
+  displayImmediateNotification,
 } from './notificationService';
 import {getAllSubscriptions, updateSubscription} from '../../db/repositories/subscriptionRepository';
 
@@ -59,12 +60,19 @@ export async function scheduleNotification(
     sub.notification_advance_days,
   );
 
-  if (notifyDate.getTime() <= Date.now()) {
-    return;
-  }
-
   const title = `${sub.name} - Odeme Hatirlatmasi`;
   const body = `${sub.billing_amount.toFixed(2)} ${sub.currency} odemeniz ${sub.notification_advance_days} gun icinde.`;
+
+  if (notifyDate.getTime() <= Date.now()) {
+    // Notification date passed - check if payment date is still upcoming
+    const paymentDate = new Date(sub.next_payment_date);
+    paymentDate.setHours(23, 59, 59, 999);
+    if (paymentDate.getTime() >= Date.now()) {
+      // Payment hasn't happened yet, fire notification immediately
+      await displayImmediateNotification(sub.id, title, body);
+    }
+    return;
+  }
 
   await scheduleLocalNotification(sub.id, notifyDate, title, body);
 }
