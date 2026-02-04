@@ -135,7 +135,7 @@ export function SubscriptionFormScreen() {
       }
       navigation.goBack();
     } catch (error) {
-      console.error('Failed to save subscription:', error);
+      if (__DEV__) { console.error('Failed to save subscription:', error); }
       Alert.alert(t('common.error'), String(error));
     }
   }, [name, amount, currency, billingCycle, customDays, nextPaymentDate, reminderEnabled, advanceDays, category, notes, serviceUrl, isEditing, editId, navigation, t]);

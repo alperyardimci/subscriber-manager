@@ -63,7 +63,7 @@ export function SubscriptionListScreen() {
       setSubscriptions(data);
       setCredentialCounts(counts);
     } catch (error) {
-      console.error('Failed to load subscriptions:', error);
+      if (__DEV__) { console.error('Failed to load subscriptions:', error); }
     }
   }, []);
 

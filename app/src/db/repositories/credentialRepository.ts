@@ -56,6 +56,10 @@ export async function createCredential(
   return {...cred, id, created_at: now, updated_at: now};
 }
 
+const CREDENTIAL_COLUMNS = new Set([
+  'subscription_id', 'service_url', 'username', 'encrypted_password_ref',
+]);
+
 export async function updateCredential(
   id: string,
   cred: Partial<Omit<Credential, 'id' | 'created_at' | 'updated_at'>>,
@@ -68,6 +72,9 @@ export async function updateCredential(
 
   const entries = Object.entries(cred) as [string, string | null][];
   for (const [key, value] of entries) {
+    if (!CREDENTIAL_COLUMNS.has(key)) {
+      continue;
+    }
     fields.push(`${key} = ?`);
     values.push(value);
   }

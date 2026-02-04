@@ -39,8 +39,8 @@ export async function getDatabase(): Promise<QuickSQLiteConnection> {
 
   db = open({name: DB_NAME});
 
-  // SQLCipher encryption via PRAGMA
-  db.execute(`PRAGMA key = '${encryptionKey}';`);
+  // SQLCipher encryption via PRAGMA (parameterized to prevent injection)
+  db.execute('PRAGMA key = ?;', [encryptionKey]);
   db.execute('PRAGMA foreign_keys = ON;');
 
   await runMigrations(db);

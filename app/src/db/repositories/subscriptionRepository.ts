@@ -61,6 +61,12 @@ export async function createSubscription(
   return {...sub, id, created_at: now, updated_at: now};
 }
 
+const SUBSCRIPTION_COLUMNS = new Set([
+  'name', 'service_url', 'billing_amount', 'currency',
+  'billing_cycle', 'custom_cycle_days', 'next_payment_date',
+  'notification_advance_days', 'category', 'notes',
+]);
+
 export async function updateSubscription(
   id: string,
   sub: Partial<Omit<Subscription, 'id' | 'created_at' | 'updated_at'>>,
@@ -73,6 +79,9 @@ export async function updateSubscription(
 
   const entries = Object.entries(sub) as [string, string | number | null][];
   for (const [key, value] of entries) {
+    if (!SUBSCRIPTION_COLUMNS.has(key)) {
+      continue;
+    }
     fields.push(`${key} = ?`);
     values.push(value);
   }

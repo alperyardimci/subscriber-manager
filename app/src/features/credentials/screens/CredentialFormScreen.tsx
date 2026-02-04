@@ -103,7 +103,7 @@ export function CredentialFormScreen() {
       }
       navigation.goBack();
     } catch (error) {
-      console.error('Failed to save credential:', error);
+      if (__DEV__) { console.error('Failed to save credential:', error); }
       Alert.alert(t('common.error'), String(error));
     }
   }
