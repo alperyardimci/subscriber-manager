@@ -259,7 +259,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CURRENT_PROJECT_VERSION = 2;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 3;
+				DEVELOPMENT_TEAM = 9XUU5C4KK4;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = SubscriberManager/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
@@ -275,8 +277,6 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.alperyardimci.subtracker;
 				PRODUCT_NAME = SubscriberManager;
-				DEVELOPMENT_TEAM = 9XUU5C4KK4;
-				CODE_SIGN_STYLE = Automatic;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -289,7 +289,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CURRENT_PROJECT_VERSION = 2;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 3;
+				DEVELOPMENT_TEAM = 9XUU5C4KK4;
 				INFOPLIST_FILE = SubscriberManager/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -304,8 +306,6 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.alperyardimci.subtracker;
 				PRODUCT_NAME = SubscriberManager;
-				DEVELOPMENT_TEAM = 9XUU5C4KK4;
-				CODE_SIGN_STYLE = Automatic;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
