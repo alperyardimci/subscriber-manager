@@ -7,6 +7,8 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  Platform,
+  KeyboardAvoidingView,
 } from 'react-native';
 import {useTranslation} from 'react-i18next';
 import {useNavigation, useRoute} from '@react-navigation/native';
@@ -107,7 +109,14 @@ export function CredentialFormScreen() {
   }
 
   return (
-    <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}>
+    <ScrollView
+      style={styles.scrollView}
+      keyboardShouldPersistTaps="handled"
+      contentContainerStyle={styles.scrollContent}>
       <View style={styles.form}>
         <Text style={styles.label}>{t('credentials.serviceUrl').toUpperCase()}</Text>
         <TextInput
@@ -156,6 +165,7 @@ export function CredentialFormScreen() {
         </TouchableOpacity>
       </View>
     </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -163,6 +173,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
   },
   form: {
     padding: spacing.md,

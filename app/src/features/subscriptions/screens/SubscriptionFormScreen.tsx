@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   Alert,
   Switch,
   Platform,
+  KeyboardAvoidingView,
 } from 'react-native';
 import {useTranslation} from 'react-i18next';
 import {useNavigation, useRoute} from '@react-navigation/native';
@@ -92,38 +93,7 @@ export function SubscriptionFormScreen() {
     }
   }, [template?.id]);
 
-  useEffect(() => {
-    navigation.setOptions({
-      title: isEditing ? t('subscriptions.edit') : t('subscriptions.addNew'),
-    });
-  }, [navigation, isEditing, t]);
-
-  async function loadExisting(id: string) {
-    const sub = await getSubscriptionById(id);
-    if (sub) {
-      setName(sub.name);
-      setServiceUrl(sub.service_url || '');
-      setAmount(sub.billing_amount.toString());
-      setCurrency(sub.currency);
-      setBillingCycle(sub.billing_cycle);
-      setCustomDays(sub.custom_cycle_days?.toString() || '');
-      setNextPaymentDate(sub.next_payment_date);
-      setReminderEnabled(sub.notification_advance_days > 0);
-      if (sub.notification_advance_days > 0) {
-        setAdvanceDays(sub.notification_advance_days.toString());
-      } else {
-        getDefaultAdvanceDays().then(days => setAdvanceDays(String(days)));
-      }
-      const cat = sub.category || '';
-      setCategory(cat);
-      if (cat && !['video', 'music', 'cloud', 'ai', 'sports', 'productivity', 'gaming', 'education', 'news'].includes(cat)) {
-        setIsOtherCategory(true);
-      }
-      setNotes(sub.notes || '');
-    }
-  }
-
-  async function handleSave() {
+  const handleSave = useCallback(async () => {
     if (!name.trim()) {
       Alert.alert(t('common.error'), t('subscriptions.validationNameRequired'));
       return;
@@ -168,6 +138,42 @@ export function SubscriptionFormScreen() {
       console.error('Failed to save subscription:', error);
       Alert.alert(t('common.error'), String(error));
     }
+  }, [name, amount, currency, billingCycle, customDays, nextPaymentDate, reminderEnabled, advanceDays, category, notes, serviceUrl, isEditing, editId, navigation, t]);
+
+  useEffect(() => {
+    navigation.setOptions({
+      title: isEditing ? t('subscriptions.edit') : t('subscriptions.addNew'),
+      headerRight: () => (
+        <TouchableOpacity onPress={handleSave} style={styles.headerSave}>
+          <Text style={styles.headerSaveText}>{t('subscriptions.save')}</Text>
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation, isEditing, t, handleSave]);
+
+  async function loadExisting(id: string) {
+    const sub = await getSubscriptionById(id);
+    if (sub) {
+      setName(sub.name);
+      setServiceUrl(sub.service_url || '');
+      setAmount(sub.billing_amount.toString());
+      setCurrency(sub.currency);
+      setBillingCycle(sub.billing_cycle);
+      setCustomDays(sub.custom_cycle_days?.toString() || '');
+      setNextPaymentDate(sub.next_payment_date);
+      setReminderEnabled(sub.notification_advance_days > 0);
+      if (sub.notification_advance_days > 0) {
+        setAdvanceDays(sub.notification_advance_days.toString());
+      } else {
+        getDefaultAdvanceDays().then(days => setAdvanceDays(String(days)));
+      }
+      const cat = sub.category || '';
+      setCategory(cat);
+      if (cat && !['video', 'music', 'cloud', 'ai', 'sports', 'productivity', 'gaming', 'education', 'news'].includes(cat)) {
+        setIsOtherCategory(true);
+      }
+      setNotes(sub.notes || '');
+    }
   }
 
   const cycles: {key: BillingCycle; label: string}[] = [
@@ -177,65 +183,56 @@ export function SubscriptionFormScreen() {
   ];
 
   return (
-    <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}>
+    <ScrollView
+      style={styles.scrollView}
+      keyboardShouldPersistTaps="handled"
+      contentContainerStyle={styles.scrollContent}>
       <View style={styles.form}>
-        <Text style={styles.label}>{t('subscriptions.name').toUpperCase()}</Text>
         <TextInput
-          style={styles.input}
+          style={[styles.input, (template && !isEditing) && styles.inputDisabled]}
           value={name}
           onChangeText={setName}
           placeholder={t('subscriptions.namePlaceholder')}
           placeholderTextColor={colors.textLight}
+          editable={!(template && !isEditing)}
         />
 
-        <Text style={styles.label}>{t('subscriptions.serviceUrl').toUpperCase()}</Text>
-        <TextInput
-          style={styles.input}
-          value={serviceUrl}
-          onChangeText={setServiceUrl}
-          placeholder={t('subscriptions.urlPlaceholder')}
-          placeholderTextColor={colors.textLight}
-          autoCapitalize="none"
-          keyboardType="url"
-        />
-
-        <View style={styles.row}>
-          <View style={styles.halfField}>
-            <Text style={styles.label}>{t('subscriptions.amount').toUpperCase()}</Text>
-            <TextInput
-              style={styles.input}
-              value={amount}
-              onChangeText={text => setAmount(text.replace(',', '.'))}
-              placeholder={t('subscriptions.amountPlaceholder')}
-              placeholderTextColor={colors.textLight}
-              keyboardType="decimal-pad"
-            />
-          </View>
-          <View style={styles.halfField}>
-            <Text style={styles.label}>{t('subscriptions.currency').toUpperCase()}</Text>
-            <View style={styles.currencyRow}>
-              {['TRY', 'USD', 'EUR'].map(c => (
-                <TouchableOpacity
-                  key={c}
+        {/* Amount + Currency + Cycle — the core row */}
+        <View style={styles.priceRow}>
+          <TextInput
+            style={[styles.input, styles.amountInput]}
+            value={amount}
+            onChangeText={text => setAmount(text.replace(',', '.'))}
+            placeholder="0.00"
+            placeholderTextColor={colors.textLight}
+            keyboardType="decimal-pad"
+          />
+          <View style={styles.currencyRow}>
+            {['TRY', 'USD', 'EUR'].map(c => (
+              <TouchableOpacity
+                key={c}
+                style={[
+                  styles.currencyOption,
+                  currency === c && styles.currencySelected,
+                ]}
+                onPress={() => setCurrency(c)}>
+                <Text
                   style={[
-                    styles.currencyOption,
-                    currency === c && styles.currencySelected,
-                  ]}
-                  onPress={() => setCurrency(c)}>
-                  <Text
-                    style={[
-                      styles.currencyText,
-                      currency === c && styles.currencyTextSelected,
-                    ]}>
-                    {c}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+                    styles.currencyText,
+                    currency === c && styles.currencyTextSelected,
+                  ]}>
+                  {c}
+                </Text>
+              </TouchableOpacity>
+            ))}
           </View>
         </View>
 
-        <Text style={styles.label}>{t('subscriptions.billingCycle').toUpperCase()}</Text>
+        {/* Billing cycle */}
         <View style={styles.segmentRow}>
           {cycles.map(c => (
             <TouchableOpacity
@@ -257,30 +254,51 @@ export function SubscriptionFormScreen() {
         </View>
 
         {billingCycle === 'custom' && (
-          <>
-            <Text style={styles.label}>{t('subscriptions.customDays').toUpperCase()}</Text>
-            <TextInput
-              style={styles.input}
-              value={customDays}
-              onChangeText={setCustomDays}
-              keyboardType="number-pad"
-              placeholder="90"
-              placeholderTextColor={colors.textLight}
-            />
-          </>
+          <TextInput
+            style={[styles.input, styles.compactTop]}
+            value={customDays}
+            onChangeText={setCustomDays}
+            keyboardType="number-pad"
+            placeholder={t('subscriptions.customDays')}
+            placeholderTextColor={colors.textLight}
+          />
         )}
 
-        <Text style={styles.label}>{t('subscriptions.nextPayment').toUpperCase()}</Text>
-        <TouchableOpacity
-          style={styles.dateButton}
-          onPress={() => setShowDatePicker(prev => !prev)}>
-          <Text style={styles.dateButtonText}>
-            {new Date(nextPaymentDate).toLocaleDateString(
-              i18n.language === 'tr' ? 'tr-TR' : 'en-US',
-              {day: 'numeric', month: 'long', year: 'numeric'},
+        {/* Payment date + Reminder — compact row */}
+        <View style={styles.inlineRow}>
+          <TouchableOpacity
+            style={[styles.dateButton, styles.flex1]}
+            onPress={() => setShowDatePicker(prev => !prev)}>
+            <Text style={styles.dateLabelText}>{t('subscriptions.nextPayment')}</Text>
+            <Text style={styles.dateValueText}>
+              {new Date(nextPaymentDate).toLocaleDateString(
+                i18n.language === 'tr' ? 'tr-TR' : 'en-US',
+                {day: 'numeric', month: 'short'},
+              )}
+            </Text>
+          </TouchableOpacity>
+          <View style={[styles.reminderBox, styles.flex1]}>
+            <View style={styles.reminderTopRow}>
+              <Text style={styles.reminderLabel}>{t('subscriptions.reminderEnabled')}</Text>
+              <Switch
+                value={reminderEnabled}
+                onValueChange={setReminderEnabled}
+                trackColor={{false: colors.border, true: colors.primary}}
+                thumbColor={colors.text}
+              />
+            </View>
+            {reminderEnabled && (
+              <TextInput
+                style={styles.reminderDaysInput}
+                value={advanceDays}
+                onChangeText={setAdvanceDays}
+                keyboardType="number-pad"
+                placeholder={t('subscriptions.notifyBeforeDays')}
+                placeholderTextColor={colors.textLight}
+              />
             )}
-          </Text>
-        </TouchableOpacity>
+          </View>
+        </View>
         {showDatePicker ? (
           <DateTimePicker
             value={new Date(nextPaymentDate)}
@@ -301,30 +319,8 @@ export function SubscriptionFormScreen() {
           />
         ) : null}
 
-        <Text style={styles.label}>{t('subscriptions.reminderEnabled').toUpperCase()}</Text>
-        <View style={styles.reminderRow}>
-          <Text style={styles.reminderLabel}>
-            {reminderEnabled ? t('subscriptions.notifyBeforeDays') : t('subscriptions.reminderOff')}
-          </Text>
-          <Switch
-            value={reminderEnabled}
-            onValueChange={setReminderEnabled}
-            trackColor={{false: colors.border, true: colors.primary}}
-            thumbColor={colors.text}
-          />
-        </View>
-        {reminderEnabled && (
-          <TextInput
-            style={[styles.input, {marginTop: spacing.xs}]}
-            value={advanceDays}
-            onChangeText={setAdvanceDays}
-            keyboardType="number-pad"
-            placeholder="2"
-            placeholderTextColor={colors.textLight}
-          />
-        )}
-
-        <Text style={styles.label}>{t('subscriptions.category').toUpperCase()}</Text>
+        {/* Category chips */}
+        <Text style={styles.sectionLabel}>{t('subscriptions.category').toUpperCase()}</Text>
         <View style={styles.categoryGrid}>
           {CATEGORY_OPTIONS.map(({key, labelKey}) => {
             const isSelected = category === key && !isOtherCategory;
@@ -383,7 +379,7 @@ export function SubscriptionFormScreen() {
         </View>
         {isOtherCategory ? (
           <TextInput
-            style={[styles.input, {marginTop: spacing.xs}]}
+            style={[styles.input, styles.compactTop]}
             value={category}
             onChangeText={setCategory}
             placeholder={t('subscriptions.categoryPlaceholder')}
@@ -391,22 +387,29 @@ export function SubscriptionFormScreen() {
           />
         ) : null}
 
-        <Text style={styles.label}>{t('subscriptions.notes').toUpperCase()}</Text>
+        <Text style={styles.sectionLabel}>{t('subscriptions.serviceUrl').toUpperCase()}</Text>
         <TextInput
-          style={[styles.input, styles.multiline]}
+          style={styles.input}
+          value={serviceUrl}
+          onChangeText={setServiceUrl}
+          placeholder={t('subscriptions.urlPlaceholder')}
+          placeholderTextColor={colors.textLight}
+          autoCapitalize="none"
+          keyboardType="url"
+        />
+
+        <TextInput
+          style={[styles.input, styles.multiline, styles.compactTop]}
           value={notes}
           onChangeText={setNotes}
           placeholder={t('subscriptions.notesPlaceholder')}
           placeholderTextColor={colors.textLight}
           multiline
-          numberOfLines={3}
+          numberOfLines={2}
         />
-
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Text style={styles.saveButtonText}>{t('subscriptions.save')}</Text>
-        </TouchableOpacity>
       </View>
     </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -415,16 +418,24 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
   form: {
     padding: spacing.md,
+    gap: spacing.sm,
   },
-  label: {
-    fontSize: fontSize.xs,
-    fontWeight: '600',
-    color: colors.textSecondary,
-    marginBottom: spacing.xs,
-    marginTop: spacing.md,
-    letterSpacing: 0.5,
+  headerSave: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+  },
+  headerSaveText: {
+    color: colors.primary,
+    fontSize: fontSize.md,
+    fontWeight: '700',
   },
   input: {
     backgroundColor: colors.surfaceLight,
@@ -435,24 +446,30 @@ const styles = StyleSheet.create({
     fontSize: fontSize.md,
     color: colors.text,
   },
+  compactTop: {
+    marginTop: spacing.xs,
+  },
+  amountInput: {
+    flex: 1,
+    fontSize: fontSize.xl,
+    fontWeight: '700',
+  },
   multiline: {
-    minHeight: 80,
+    minHeight: 60,
     textAlignVertical: 'top',
   },
-  row: {
+  priceRow: {
     flexDirection: 'row',
-    gap: spacing.md,
-  },
-  halfField: {
-    flex: 1,
+    gap: spacing.sm,
+    alignItems: 'center',
   },
   currencyRow: {
     flexDirection: 'row',
     gap: spacing.xs,
   },
   currencyOption: {
-    flex: 1,
     paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.sm + 2,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: borderRadius.md,
@@ -496,21 +513,12 @@ const styles = StyleSheet.create({
     color: colors.background,
     fontWeight: '600',
   },
-  categoryGrid: {
+  inlineRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.xs,
+    gap: spacing.sm,
   },
-  categoryChip: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: borderRadius.full,
-    borderWidth: 1,
-    backgroundColor: colors.surface,
-  },
-  categoryChipText: {
-    fontSize: fontSize.sm,
-    fontWeight: '600',
+  flex1: {
+    flex: 1,
   },
   dateButton: {
     backgroundColor: colors.surfaceLight,
@@ -518,17 +526,21 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     borderRadius: borderRadius.md,
     padding: spacing.sm,
-    alignItems: 'center',
   },
-  dateButtonText: {
+  dateLabelText: {
+    fontSize: fontSize.xs,
+    color: colors.textSecondary,
+    marginBottom: 2,
+  },
+  dateValueText: {
     fontSize: fontSize.md,
     color: colors.primary,
     fontWeight: '600',
   },
-  reminderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  inputDisabled: {
+    opacity: 0.5,
+  },
+  reminderBox: {
     backgroundColor: colors.surfaceLight,
     borderWidth: 1,
     borderColor: colors.border,
@@ -536,21 +548,45 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
   },
+  reminderTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
   reminderLabel: {
-    fontSize: fontSize.md,
+    fontSize: fontSize.xs,
+    color: colors.text,
+    flex: 1,
+  },
+  reminderDaysInput: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.border,
+    marginTop: spacing.xs,
+    paddingTop: spacing.xs,
+    fontSize: fontSize.sm,
     color: colors.text,
   },
-  saveButton: {
-    backgroundColor: colors.primary,
-    paddingVertical: spacing.md,
-    borderRadius: borderRadius.md,
-    alignItems: 'center',
-    marginTop: spacing.lg,
-    marginBottom: spacing.xl,
+  sectionLabel: {
+    fontSize: fontSize.xs,
+    fontWeight: '600',
+    color: colors.textSecondary,
+    letterSpacing: 0.5,
+    marginTop: spacing.xs,
   },
-  saveButtonText: {
-    color: colors.background,
-    fontSize: fontSize.md,
-    fontWeight: '700',
+  categoryGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
+  },
+  categoryChip: {
+    paddingHorizontal: spacing.sm + 2,
+    paddingVertical: spacing.xs + 2,
+    borderRadius: borderRadius.full,
+    borderWidth: 1,
+    backgroundColor: colors.surface,
+  },
+  categoryChipText: {
+    fontSize: fontSize.xs,
+    fontWeight: '600',
   },
 });
