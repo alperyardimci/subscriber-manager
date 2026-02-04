@@ -99,7 +99,8 @@
     "autofillSetup": "Kurulum",
     "autofillLabel": "Otomatik Doldurma",
     "about": "Hakkında",
-    "version": "Sürüm"
+    "version": "Sürüm",
+    "developer": "Geliştirici"
   },
   "templates": {
     "title": "Abonelik Ekle",

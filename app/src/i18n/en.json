@@ -99,7 +99,8 @@
     "autofillSetup": "Setup",
     "autofillLabel": "AutoFill",
     "about": "About",
-    "version": "Version"
+    "version": "Version",
+    "developer": "Developer"
   },
   "templates": {
     "title": "Add Subscription",

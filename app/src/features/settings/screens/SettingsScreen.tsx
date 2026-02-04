@@ -132,18 +132,14 @@ export function SettingsScreen() {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('settings.autofill').toUpperCase()}</Text>
-        <View style={styles.row}>
-          <Text style={styles.rowLabel}>{t('settings.autofillLabel')}</Text>
-          <Text style={styles.rowValue}>{t('settings.autofillSetup')}</Text>
-        </View>
-      </View>
-
-      <View style={styles.section}>
         <Text style={styles.sectionTitle}>{t('settings.about').toUpperCase()}</Text>
         <View style={styles.row}>
           <Text style={styles.rowLabel}>{t('settings.version')}</Text>
-          <Text style={styles.rowValue}>1.0</Text>
+          <Text style={styles.rowValue}>2.0</Text>
+        </View>
+        <View style={styles.row}>
+          <Text style={styles.rowLabel}>{t('settings.developer')}</Text>
+          <Text style={styles.rowValue}>Alper Yardimci</Text>
         </View>
       </View>
     </ScrollView>

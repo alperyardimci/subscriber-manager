@@ -1,13 +1,16 @@
 import React from 'react';
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import {useTranslation} from 'react-i18next';
+import Ionicons from '@react-native-vector-icons/ionicons';
 import i18n from '../../../i18n';
-import {colors, spacing, fontSize, borderRadius, categoryColor} from '../../../lib/theme';
+import {colors, spacing, fontSize, borderRadius, categoryColor, } from '../../../lib/theme';
 import type {Subscription} from '../../../lib/types';
 
 interface Props {
   subscription: Subscription;
   onPress: (id: string) => void;
+  hasCredentials?: boolean;
+  onDelete?: (id: string) => void;
 }
 
 function formatDate(dateStr: string): string {
@@ -28,7 +31,7 @@ function getDaysUntil(dateStr: string): number {
   return Math.ceil((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 }
 
-export function SubscriptionCard({subscription, onPress}: Props) {
+export function SubscriptionCard({subscription, onPress, hasCredentials, onDelete}: Props) {
   const {t} = useTranslation();
   const daysUntil = getDaysUntil(subscription.next_payment_date);
   const catColor = subscription.category
@@ -66,6 +69,12 @@ export function SubscriptionCard({subscription, onPress}: Props) {
             {subscription.category && (
               <Text style={styles.category}>{subscription.category}</Text>
             )}
+            {hasCredentials === true && (
+              <Ionicons name="key" size={13} color={colors.success} />
+            )}
+            {hasCredentials === false && (
+              <Ionicons name="key-outline" size={13} color={colors.warning} />
+            )}
           </View>
         </View>
         <View style={styles.right}>
@@ -81,6 +90,14 @@ export function SubscriptionCard({subscription, onPress}: Props) {
             </Text>
           </View>
         </View>
+        {onDelete && (
+          <TouchableOpacity
+            style={styles.deleteButton}
+            onPress={() => onDelete(subscription.id)}
+            hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}>
+            <Ionicons name="trash-outline" size={16} color={colors.textLight} />
+          </TouchableOpacity>
+        )}
       </View>
     </TouchableOpacity>
   );
@@ -96,6 +113,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     borderLeftWidth: 3,
+  },
+  deleteButton: {
+    paddingLeft: spacing.sm,
+    justifyContent: 'center',
   },
   row: {
     flexDirection: 'row',

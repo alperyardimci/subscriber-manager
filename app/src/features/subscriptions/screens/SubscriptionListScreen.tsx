@@ -6,22 +6,18 @@ import {
   StyleSheet,
   TouchableOpacity,
   RefreshControl,
-  LayoutAnimation,
-  Platform,
-  UIManager,
+  Alert,
 } from 'react-native';
 import {useTranslation} from 'react-i18next';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import Ionicons from '@react-native-vector-icons/ionicons';
-import {getAllSubscriptions} from '../../../db/repositories/subscriptionRepository';
+import {getAllSubscriptions, deleteSubscription} from '../../../db/repositories/subscriptionRepository';
+import {deleteCredentialsBySubscription, getCredentialCountsBySubscriptions} from '../../../db/repositories/credentialRepository';
+import {cancelNotification} from '../../notifications/notificationScheduler';
 import {SubscriptionCard} from '../components/SubscriptionCard';
 import {colors, spacing, fontSize, borderRadius} from '../../../lib/theme';
 import type {Subscription, RootStackParamList, BillingCycle} from '../../../lib/types';
-
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 
 type NavProp = NativeStackNavigationProp<RootStackParamList>;
 type FilterType = 'all' | BillingCycle;
@@ -34,15 +30,15 @@ function sortCurrencies(totals: Record<string, number>): string[] {
   );
 }
 
-function CurrencyRow({totals, currencies}: {totals: Record<string, number>; currencies: string[]}) {
+function CurrencyRow({totals, currencies, compact}: {totals: Record<string, number>; currencies: string[]; compact?: boolean}) {
   return (
     <View style={styles.currencyRow}>
       {currencies.map((cur, i) => (
         <React.Fragment key={cur}>
-          {i > 0 && <Text style={styles.plusSign}>+</Text>}
-          <Text style={styles.currencyAmount}>
+          {i > 0 && <Text style={[styles.plusSign, compact && styles.plusSignCompact]}>+</Text>}
+          <Text style={[styles.currencyAmount, compact && styles.currencyAmountCompact]}>
             {totals[cur].toFixed(2)}{' '}
-            <Text style={styles.currencyCode}>{cur}</Text>
+            <Text style={[styles.currencyCode, compact && styles.currencyCodeCompact]}>{cur}</Text>
           </Text>
         </React.Fragment>
       ))}
@@ -56,12 +52,16 @@ export function SubscriptionListScreen() {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<FilterType>('all');
-  const [yearlyExpanded, setYearlyExpanded] = useState(false);
+  const [credentialCounts, setCredentialCounts] = useState<Map<string, number>>(new Map());
 
   const loadSubscriptions = useCallback(async () => {
     try {
-      const data = await getAllSubscriptions();
+      const [data, counts] = await Promise.all([
+        getAllSubscriptions(),
+        getCredentialCountsBySubscriptions(),
+      ]);
       setSubscriptions(data);
+      setCredentialCounts(counts);
     } catch (error) {
       console.error('Failed to load subscriptions:', error);
     }
@@ -123,9 +123,24 @@ export function SubscriptionListScreen() {
     {key: 'custom', label: t('subscriptions.custom')},
   ];
 
-  function toggleYearly() {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setYearlyExpanded(prev => !prev);
+  function handleDelete(id: string) {
+    Alert.alert(
+      t('subscriptions.deleteConfirmTitle'),
+      t('subscriptions.deleteConfirmMessage'),
+      [
+        {text: t('subscriptions.cancel'), style: 'cancel'},
+        {
+          text: t('subscriptions.delete'),
+          style: 'destructive',
+          onPress: async () => {
+            await cancelNotification(id);
+            await deleteCredentialsBySubscription(id);
+            await deleteSubscription(id);
+            loadSubscriptions();
+          },
+        },
+      ],
+    );
   }
 
   const renderEmpty = () => {
@@ -160,31 +175,12 @@ export function SubscriptionListScreen() {
               </Text>
             </View>
             {hasUpcoming ? (
-              <CurrencyRow totals={upcomingTotals} currencies={sortedUpcoming} />
+              <CurrencyRow totals={upcomingTotals} currencies={sortedUpcoming} compact />
             ) : (
               <Text style={styles.noUpcoming}>{t('subscriptions.noUpcoming')}</Text>
             )}
           </View>
 
-          {/* Yearly accordion */}
-          {sortedYearly.length > 0 && (
-            <View style={styles.accordionWrapper}>
-              <TouchableOpacity
-                style={styles.accordionHeader}
-                onPress={toggleYearly}
-                activeOpacity={0.7}>
-                <Text style={styles.accordionLabel}>{t('subscriptions.totalYearly').toUpperCase()}</Text>
-                <Text style={styles.accordionChevron}>
-                  {yearlyExpanded ? '▲' : '▼'}
-                </Text>
-              </TouchableOpacity>
-              {yearlyExpanded && (
-                <View style={styles.accordionBody}>
-                  <CurrencyRow totals={yearlyTotals} currencies={sortedYearly} />
-                </View>
-              )}
-            </View>
-          )}
         </View>
       )}
 
@@ -217,6 +213,8 @@ export function SubscriptionListScreen() {
           <SubscriptionCard
             subscription={item}
             onPress={id => navigation.navigate('SubscriptionDetail', {subscriptionId: id})}
+            hasCredentials={(credentialCounts.get(item.id) ?? 0) > 0}
+            onDelete={handleDelete}
           />
         )}
         ListEmptyComponent={renderEmpty}
@@ -232,8 +230,15 @@ export function SubscriptionListScreen() {
         }
       />
 
+      {subscriptions.length > 0 && sortedYearly.length > 0 && (
+        <View style={styles.fixedFooter}>
+          <Text style={styles.footerLabel}>{t('subscriptions.totalYearly').toUpperCase()}</Text>
+          <CurrencyRow totals={yearlyTotals} currencies={sortedYearly} compact />
+        </View>
+      )}
+
       <TouchableOpacity
-        style={styles.fab}
+        style={[styles.fab, subscriptions.length > 0 && sortedYearly.length > 0 && styles.fabAboveFooter]}
         onPress={() => navigation.navigate('TemplatePicker')}
         activeOpacity={0.8}>
         <Ionicons name="add" size={22} color={colors.background} />
@@ -299,29 +304,29 @@ const styles = StyleSheet.create({
     fontSize: fontSize.md,
     fontWeight: '600',
   },
-  accordionWrapper: {
-    borderTopWidth: StyleSheet.hairlineWidth,
+  fixedFooter: {
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderTopWidth: 1,
     borderTopColor: colors.border,
-    marginHorizontal: spacing.md,
+    backgroundColor: colors.surface,
   },
-  accordionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: spacing.sm + 2,
-  },
-  accordionLabel: {
+  footerLabel: {
     color: colors.textSecondary,
     fontSize: fontSize.xs,
     fontWeight: '600',
     letterSpacing: 1,
+    marginBottom: spacing.xs,
   },
-  accordionChevron: {
-    color: colors.textSecondary,
+  currencyAmountCompact: {
+    fontSize: fontSize.md,
+    fontWeight: '600',
+  },
+  currencyCodeCompact: {
     fontSize: fontSize.xs,
   },
-  accordionBody: {
-    paddingBottom: spacing.sm + 2,
+  plusSignCompact: {
+    fontSize: fontSize.sm,
   },
   filterRow: {
     flexDirection: 'row',
@@ -378,6 +383,9 @@ const styles = StyleSheet.create({
     color: colors.background,
     fontSize: fontSize.md,
     fontWeight: '600',
+  },
+  fabAboveFooter: {
+    bottom: spacing.lg + 48,
   },
   fab: {
     position: 'absolute',

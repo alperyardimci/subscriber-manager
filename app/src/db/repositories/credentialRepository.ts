@@ -95,3 +95,20 @@ export async function deleteCredentialsBySubscription(
     subscriptionId,
   ]);
 }
+
+export async function getCredentialCountsBySubscriptions(): Promise<
+  Map<string, number>
+> {
+  const db = await getDatabase();
+  const result = db.execute(
+    'SELECT subscription_id, COUNT(*) as count FROM credentials GROUP BY subscription_id',
+  );
+  const map = new Map<string, number>();
+  if (result.rows) {
+    for (let i = 0; i < result.rows.length; i++) {
+      const row = result.rows.item(i);
+      map.set(row.subscription_id, row.count);
+    }
+  }
+  return map;
+}
