@@ -193,7 +193,7 @@ export function SubscriptionFormScreen() {
       ref={scrollViewRef}
       style={styles.scrollView}
       keyboardShouldPersistTaps="handled"
-      keyboardDismissMode="on-drag"
+      keyboardDismissMode="interactive"
       contentContainerStyle={styles.scrollContent}>
       <View style={styles.form}>
         <TextInput
