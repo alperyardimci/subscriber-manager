@@ -64,7 +64,7 @@ export async function createSubscription(
 const SUBSCRIPTION_COLUMNS = new Set([
   'name', 'service_url', 'billing_amount', 'currency',
   'billing_cycle', 'custom_cycle_days', 'next_payment_date',
-  'notification_advance_days', 'category', 'notes',
+  'notification_advance_days', 'category', 'notes', 'last_notified_date',
 ]);
 
 export async function updateSubscription(

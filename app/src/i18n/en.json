@@ -48,6 +48,7 @@
     "filterAll": "All",
     "reminderEnabled": "Payment Reminder",
     "reminderOff": "Off",
+    "daysBefore": "days before",
     "subscriptionCount": "{{count}} subscriptions",
     "credentials": "Credentials",
     "addCredential": "+ Add Credential",

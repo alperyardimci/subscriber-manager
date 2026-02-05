@@ -14,6 +14,7 @@ interface SchedulableSubscription {
   custom_cycle_days: number | null;
   next_payment_date: string;
   notification_advance_days: number;
+  last_notified_date?: string | null;
 }
 
 export function calculateNextPaymentDate(
@@ -68,8 +69,14 @@ export async function scheduleNotification(
     const paymentDate = new Date(sub.next_payment_date);
     paymentDate.setHours(23, 59, 59, 999);
     if (paymentDate.getTime() >= Date.now()) {
+      // Check if we already notified for this payment period
+      if (sub.last_notified_date === sub.next_payment_date) {
+        return; // Already notified, skip
+      }
       // Payment hasn't happened yet, fire notification immediately
       await displayImmediateNotification(sub.id, title, body);
+      // Mark as notified for this payment date
+      await updateSubscription(sub.id, {last_notified_date: sub.next_payment_date});
     }
     return;
   }
@@ -96,8 +103,9 @@ export async function rescheduleAllNotifications(): Promise<void> {
         sub.billing_cycle,
         sub.custom_cycle_days,
       );
-      await updateSubscription(sub.id, {next_payment_date: newPaymentDate});
-      await scheduleNotification({...sub, next_payment_date: newPaymentDate});
+      // Reset last_notified_date when advancing to new payment period
+      await updateSubscription(sub.id, {next_payment_date: newPaymentDate, last_notified_date: null});
+      await scheduleNotification({...sub, next_payment_date: newPaymentDate, last_notified_date: null});
     } else {
       await scheduleNotification(sub);
     }

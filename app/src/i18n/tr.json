@@ -48,6 +48,7 @@
     "filterAll": "Tümü",
     "reminderEnabled": "Ödeme Hatırlatma",
     "reminderOff": "Kapalı",
+    "daysBefore": "gün önce",
     "subscriptionCount": "{{count}} abonelik",
     "credentials": "Kimlik Bilgileri",
     "addCredential": "+ Kimlik Bilgisi Ekle",

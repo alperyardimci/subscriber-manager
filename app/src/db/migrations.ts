@@ -65,6 +65,14 @@ const migrations: Migration[] = [
       );
     },
   },
+  {
+    version: 3,
+    up: (db: QuickSQLiteConnection) => {
+      db.execute(`
+        ALTER TABLE subscriptions ADD COLUMN last_notified_date TEXT;
+      `);
+    },
+  },
 ];
 
 export async function runMigrations(db: QuickSQLiteConnection): Promise<void> {

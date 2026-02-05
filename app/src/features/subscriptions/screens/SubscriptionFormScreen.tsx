@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useCallback} from 'react';
+import React, {useState, useEffect, useCallback, useRef} from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   Switch,
   Platform,
   KeyboardAvoidingView,
+  Keyboard,
 } from 'react-native';
 import {useTranslation} from 'react-i18next';
 import {useNavigation, useRoute} from '@react-navigation/native';
@@ -63,6 +64,7 @@ export function SubscriptionFormScreen() {
   const [notes, setNotes] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [isOtherCategory, setIsOtherCategory] = useState(false);
+  const scrollViewRef = useRef<ScrollView>(null);
 
   const CATEGORY_OPTIONS = [
     {key: 'video', labelKey: 'subscriptions.categoryVideo'},
@@ -188,8 +190,10 @@ export function SubscriptionFormScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}>
     <ScrollView
+      ref={scrollViewRef}
       style={styles.scrollView}
       keyboardShouldPersistTaps="handled"
+      keyboardDismissMode="on-drag"
       contentContainerStyle={styles.scrollContent}>
       <View style={styles.form}>
         <TextInput
@@ -288,14 +292,19 @@ export function SubscriptionFormScreen() {
               />
             </View>
             {reminderEnabled && (
-              <TextInput
-                style={styles.reminderDaysInput}
-                value={advanceDays}
-                onChangeText={setAdvanceDays}
-                keyboardType="number-pad"
-                placeholder={t('subscriptions.notifyBeforeDays')}
-                placeholderTextColor={colors.textLight}
-              />
+              <View style={styles.reminderDaysRow}>
+                <View style={styles.daysInputWrapper}>
+                  <TextInput
+                    style={styles.reminderDaysInput}
+                    value={advanceDays}
+                    onChangeText={setAdvanceDays}
+                    keyboardType="number-pad"
+                    placeholder="2"
+                    placeholderTextColor={colors.textLight}
+                  />
+                </View>
+                <Text style={styles.daysBeforeLabel}>{t('subscriptions.daysBefore')}</Text>
+              </View>
             )}
           </View>
         </View>
@@ -406,6 +415,11 @@ export function SubscriptionFormScreen() {
           placeholderTextColor={colors.textLight}
           multiline
           numberOfLines={2}
+          onFocus={() => {
+            setTimeout(() => {
+              scrollViewRef.current?.scrollToEnd({animated: true});
+            }, 300);
+          }}
         />
       </View>
     </ScrollView>
@@ -558,13 +572,33 @@ const styles = StyleSheet.create({
     color: colors.text,
     flex: 1,
   },
-  reminderDaysInput: {
+  reminderDaysRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: colors.border,
     marginTop: spacing.xs,
     paddingTop: spacing.xs,
+  },
+  daysInputWrapper: {
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: borderRadius.sm,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    minWidth: 44,
+  },
+  reminderDaysInput: {
     fontSize: fontSize.sm,
     color: colors.text,
+    textAlign: 'center',
+    padding: 0,
+  },
+  daysBeforeLabel: {
+    fontSize: fontSize.sm,
+    color: colors.textSecondary,
+    marginLeft: spacing.sm,
   },
   sectionLabel: {
     fontSize: fontSize.xs,

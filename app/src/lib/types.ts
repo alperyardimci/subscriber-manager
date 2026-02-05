@@ -10,6 +10,7 @@ export interface Subscription {
   notification_advance_days: number;
   category: string | null;
   notes: string | null;
+  last_notified_date: string | null;
   created_at: string;
   updated_at: string;
 }
